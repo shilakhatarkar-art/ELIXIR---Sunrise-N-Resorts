@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELIXIR - Sunrise N Resorts</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: {
+              50:'#FFF9E6', 100:'#FFF0B3', 200:'#FFE680', 300:'#FFDB4D',
+              400:'#FFD11A', 500:'#C8A951', 600:'#B8942E', 700:'#8A6F22',
+              800:'#5C4A17', 900:'#2E250B'
+            },
+            midnight: {
+              50:'#f5f5f6', 100:'#e5e5e8', 200:'#cdced3', 300:'#a9abb4',
+              400:'#7d808d', 500:'#626572', 600:'#535560', 700:'#474851',
+              800:'#2D2D32', 900:'#1A1A1F', 950:'#111114'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #fff; }
+    .font-display { font-family: 'Playfair Display', serif; }
+    .page-wrap { height: 100vh; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes float    { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+    @keyframes shimmer  { 0%{background-position:-200% 0}100%{background-position:200% 0} }
+    @keyframes toastIn  { from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)} }
+    @keyframes toastOut { from{opacity:1;transform:translateX(-50%) translateY(0)}to{opacity:0;transform:translateX(-50%) translateY(12px)} }
+
+    .anim-fade-up   { animation: fadeUp 0.65s ease both; opacity:0; }
+    .d1 { animation-delay: 0.1s; }
+    .d2 { animation-delay: 0.2s; }
+    .d3 { animation-delay: 0.3s; }
+    .d4 { animation-delay: 0.4s; }
+    .float { animation: float 3.2s ease-in-out infinite; }
+
+    /* ── Hero ── */
+    .hero-bg {
+      background: linear-gradient(140deg, #1A1A1F 0%, #2D2D32 45%, #1A1A1F 100%);
+      position: relative;
+    }
+    .hero-bg::before {
+      content:'';
+      position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse at 50% 0%,  rgba(200,169,81,.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(200,169,81,.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* ── Ornament ── */
+    .ornament {
+      display:flex; align-items:center; gap:12px; justify-content:center;
+    }
+    .ornament::before {
+      content:''; height:1px; width:38px;
+      background: linear-gradient(90deg, transparent, #C8A951);
+    }
+    .ornament::after {
+      content:''; height:1px; width:38px;
+      background: linear-gradient(90deg, #C8A951, transparent);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height:1px;
+      background: linear-gradient(90deg,transparent,rgba(200,169,81,.3),transparent);
+    }
+
+    /* ── Buttons ── */
+    .btn-gold {
+      background: linear-gradient(135deg,#C8A951 0%,#FFD11A 100%);
+      color: #1A1A1F; font-weight:600;
+      transition: box-shadow .25s, transform .25s;
+    }
+    .btn-gold:hover   { box-shadow:0 6px 20px rgba(200,169,81,.45); transform:translateY(-1px); }
+    .btn-gold:active  { transform:translateY(0); }
+    .btn-wa {
+      background: linear-gradient(135deg,#25D366 0%,#128C7E 100%);
+      color:#fff; font-weight:600;
+      transition: box-shadow .25s, transform .25s;
+    }
+    .btn-wa:hover  { box-shadow:0 6px 20px rgba(37,211,102,.4); transform:translateY(-1px); }
+    .btn-wa:active { transform:translateY(0); }
+
+    /* ── Category cards ── */
+    .cat-card {
+      cursor:pointer;
+      transition: transform .28s cubic-bezier(.4,0,.2,1), box-shadow .28s;
+    }
+    .cat-card:hover, .cat-card:active {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 28px rgba(200,169,81,.22);
+    }
+
+    /* ── Menu item cards ── */
+    .item-card { transition: transform .25s, box-shadow .25s; }
+    .item-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+
+    /* ── Veg / Non-veg dot ── */
+    .veg-dot    { width:14px; height:14px; border:2px solid #22C55E; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .veg-dot::after    { content:''; width:6px; height:6px; background:#22C55E; border-radius:50%; }
+    .nonveg-dot { width:14px; height:14px; border:2px solid #EF4444; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .nonveg-dot::after { content:''; width:6px; height:6px; background:#EF4444; border-radius:50%; }
+
+    /* ── Modal ── */
+    .modal-bg {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      z-index:200;
+      display:flex; align-items:flex-end; justify-content:center;
+      opacity:0; pointer-events:none;
+      transition: opacity .3s ease;
+    }
+    .modal-bg.open { opacity:1; pointer-events:all; }
+    .modal-sheet {
+      background:#fff; border-radius:20px 20px 0 0;
+      width:100%; max-width:480px;
+      max-height:88vh; overflow-y:auto;
+      transform:translateY(100%);
+      transition: transform .38s cubic-bezier(.4,0,.2,1);
+    }
+    .modal-bg.open .modal-sheet { transform:translateY(0); }
+
+    /* ── Toast ── */
+    #toast {
+      position:fixed; bottom:88px; left:50%; transform:translateX(-50%) translateY(12px);
+      z-index:999; pointer-events:none; opacity:0;
+      background:#1A1A1F; color:#fff;
+      padding:10px 20px; border-radius:999px;
+      font-size:.85rem; font-weight:500;
+      display:flex; align-items:center; gap:8px;
+      white-space:nowrap;
+      box-shadow:0 4px 20px rgba(0,0,0,.25);
+    }
+    #toast.show  { animation: toastIn  .3s ease forwards; }
+    #toast.hide  { animation: toastOut .3s ease forwards; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(200,169,81,.3); border-radius:4px; }
+
+    /* ── Input focus ── */
+    input:focus, textarea:focus {
+      outline:none; border-color:#C8A951 !important;
+      box-shadow:0 0 0 2px rgba(200,169,81,.25);
+    }
+
+    /* ── Cart fab ── */
+    #cartFab {
+      position:fixed; bottom:24px; right:20px; z-index:100;
+      transition: transform .25s, box-shadow .25s;
+    }
+    #cartFab:hover { transform:scale(1.06); }
+  </style>
+</head>
+<body>
+<div class="page-wrap" id="pageWrap">
+
+  <nav id="topNav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" style="background:transparent;">
+    <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-md">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1A1A1F" stroke-width="2.5">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+        <span class="font-display font-semibold text-white text-sm tracking-wide">ELIXIR - Sunrise N Resorts</span>
+      </div>
+      <button onclick="openCart()" class="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3.5 py-2 flex items-center gap-2 text-white text-sm font-medium">
+        <i data-lucide="shopping-bag" style="width:15px;height:15px;"></i>
+        <span id="navCartCount" class="bg-gold-500 text-midnight-900 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="hero-bg relative overflow-hidden" style="min-height:430px;">
+    <div class="relative z-10 max-w-lg mx-auto px-6 pt-24 pb-16 text-center">
+      <div class="ornament mb-4 anim-fade-up">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#C8A951">
+          <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9"/>
+        </svg>
+      </div>
+      <h1 class="font-display text-4xl md:text-5xl font-bold text-white mb-3 anim-fade-up d1 leading-tight">
+        ELIXIR Multi Cuisine
+      </h1>
+      <p class="text-gold-200 text-lg mb-2 anim-fade-up d2">
+        Order food &amp; beverages directly to your room
+      </p>
+      <p class="text-white/50 text-sm mb-8 anim-fade-up d3 flex items-center justify-center gap-1.5">
+        <i data-lucide="clock" style="width:14px;height:14px;"></i>
+        Delivered hot & fresh
+      </p>
+      <a href="#menuSection" class="inline-flex items-center gap-2 btn-gold px-8 py-3.5 rounded-full text-sm anim-fade-up d4">
+        <i data-lucide="utensils" style="width:17px;height:17px;"></i>
+        View Menu
+      </a>
+      <div class="absolute top-12 left-4 w-20 h-20 rounded-full border border-gold-500/10 float" style="animation-delay:0s;"></div>
+      <div class="absolute bottom-16 right-6 w-14 h-14 rounded-full border border-gold-500/10 float" style="animation-delay:1s;"></div>
+      <div class="absolute top-28 right-12 w-2.5 h-2.5 rounded-full bg-gold-500/30 float" style="animation-delay:.5s;"></div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-16" style="background:linear-gradient(to top,#fff,transparent);"></div>
+  </header>
+
+  <section id="menuSection" class="max-w-lg mx-auto px-4 py-8">
+    <div class="text-center mb-6">
+      <p class="text-gold-600 text-xs font-semibold tracking-[.2em] uppercase mb-1">Explore</p>
+      <h2 class="font-display text-2xl font-bold text-midnight-900">Our Menu</h2>
+    </div>
+    <div id="categoriesGrid" class="grid grid-cols-3 gap-3"></div>
+  </section>
+
+  <div class="divider max-w-xs mx-auto"></div>
+
+  <section class="max-w-lg mx-auto px-4 py-8">
+    <div class="text-center mb-6">
+      <p class="text-gold-600 text-xs font-semibold tracking-[.2em] uppercase mb-1">Perfect Combinations</p>
+      <h2 class="font-display text-2xl font-bold text-midnight-900">Today's Highlights</h2>
+    </div>
+    <div class="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory" style="-webkit-overflow-scrolling:touch;">
+      
+      <div class="snap-start shrink-0 w-72 bg-gradient-to-br from-midnight-900 to-midnight-800 rounded-2xl p-5 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-gold-500/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <span class="text-gold-400 text-xs font-semibold tracking-wider uppercase">Serves 2</span>
+        <h3 class="font-display text-xl font-bold mt-2 mb-1">Couple's Delight</h3>
+        <p class="text-white/60 text-xs mb-4">Paneer Tikka, Butter Chicken, 2 Butter Naan, Veg Biryani & Hot Gulab Jamun (2 pcs)</p>
+        <div class="flex items-center justify-between">
+          <span class="text-gold-400 font-bold text-lg">₹1299</span>
+          <button onclick="addToCart('Combo: Couple\'s Delight', 1299)" class="btn-gold px-4 py-2 rounded-full text-xs">Add to Order</button>
+        </div>
+      </div>
+      
+      <div class="snap-start shrink-0 w-72 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-5 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-400/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <span class="text-purple-300 text-xs font-semibold tracking-wider uppercase">Serves 3</span>
+        <h3 class="font-display text-xl font-bold mt-2 mb-1">Trio Feast</h3>
+        <p class="text-white/60 text-xs mb-4">Tandoori Chicken (Half), Paneer Butter Masala, Dal Makhani, 4 Garlic Naan, Veg Pulao</p>
+        <div class="flex items-center justify-between">
+          <span class="text-purple-300 font-bold text-lg">₹1499</span>
+          <button onclick="addToCart('Combo: Trio Feast', 1499)" class="bg-white/20 backdrop-blur px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition-colors">Add to Order</button>
+        </div>
+      </div>
+      
+      <div class="snap-start shrink-0 w-72 bg-gradient-to-br from-amber-800 to-orange-900 rounded-2xl p-5 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+        <span class="text-amber-300 text-xs font-semibold tracking-wider uppercase">Serves 4</span>
+        <h3 class="font-display text-xl font-bold mt-2 mb-1">Group Celebration</h3>
+        <p class="text-white/60 text-xs mb-4">Hara Bhara Kebab, Chili Chicken, Mutton Roganjosh, Veg Kadhai, 6 Butter Naan, Chicken Fried Rice, Brownies</p>
+        <div class="flex items-center justify-between">
+          <span class="text-amber-300 font-bold text-lg">₹2299</span>
+          <button onclick="addToCart('Combo: Group Celebration', 2299)" class="bg-white/20 backdrop-blur px-4 py-2 rounded-full text-xs font-semibold hover:bg-white/30 transition-colors">Add to Order</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider max-w-xs mx-auto"></div>
+
+  <section id="itemsSection" class="max-w-lg mx-auto px-4 py-8 hidden">
+    <div class="flex items-center gap-3 mb-6">
+      <button onclick="backToCategories()" class="w-10 h-10 rounded-full bg-midnight-50 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="arrow-left" style="width:20px;height:20px;color:#2D2D32;"></i>
+      </button>
+      <div>
+        <p class="text-gold-600 text-xs font-semibold tracking-[.2em] uppercase">Menu</p>
+        <h2 id="categoryTitle" class="font-display text-xl font-bold text-midnight-900"></h2>
+      </div>
+    </div>
+    <div id="itemsList" class="space-y-3"></div>
+  </section>
+
+  <section class="max-w-lg mx-auto px-4 py-8">
+    <div class="text-center mb-6">
+      <p class="text-gold-600 text-xs font-semibold tracking-[.2em] uppercase mb-1">Simple &amp; Quick</p>
+      <h2 class="font-display text-2xl font-bold text-midnight-900">How to Order</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-midnight-50 rounded-2xl p-4 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gold-100 flex items-center justify-center">
+          <i data-lucide="scan-line" style="width:22px;height:22px;color:#C8A951;"></i>
+        </div>
+        <p class="font-semibold text-midnight-900 text-sm">Scan QR Code</p>
+        <p class="text-midnight-400 text-xs mt-1">In your room</p>
+      </div>
+      <div class="bg-midnight-50 rounded-2xl p-4 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gold-100 flex items-center justify-center">
+          <i data-lucide="book-open" style="width:22px;height:22px;color:#C8A951;"></i>
+        </div>
+        <p class="font-semibold text-midnight-900 text-sm">Browse Menu</p>
+        <p class="text-midnight-400 text-xs mt-1">Choose items</p>
+      </div>
+      <div class="bg-midnight-50 rounded-2xl p-4 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gold-100 flex items-center justify-center">
+          <i data-lucide="plus-circle" style="width:22px;height:22px;color:#C8A951;"></i>
+        </div>
+        <p class="font-semibold text-midnight-900 text-sm">Add to Order</p>
+        <p class="text-midnight-400 text-xs mt-1">Tap to add items</p>
+      </div>
+      <div class="bg-midnight-50 rounded-2xl p-4 text-center">
+        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-gold-100 flex items-center justify-center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#C8A951">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+        </div>
+        <p class="font-semibold text-midnight-900 text-sm">Send on WhatsApp</p>
+        <p class="text-midnight-400 text-xs mt-1">Confirm your order</p>
+      </div>
+    </div>
+    <div class="mt-6 text-center">
+      <button onclick="openCart()" class="btn-wa inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-base">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+        </svg>
+        Place Order on WhatsApp
+      </button>
+    </div>
+  </section>
+
+  <div class="divider max-w-xs mx-auto"></div>
+
+  <footer class="bg-midnight-900 text-white mt-4">
+    <div class="max-w-lg mx-auto px-6 py-10 text-center">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1F" stroke-width="2.5">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </div>
+      <h3 class="font-display text-xl font-bold mb-1">ELIXIR Multi Cuisine Restaurant</h3>
+      <p class="text-white/40 text-sm mb-6">Sunrise N Resorts</p>
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-white/5 rounded-xl p-4">
+          <i data-lucide="clock" style="width:20px;height:20px;color:#C8A951;margin:0 auto 8px;display:block;"></i>
+          <p class="text-xs text-white/50 mb-1">All Day Dining</p>
+          <p class="font-semibold text-sm">11 AM - 11 PM</p>
+        </div>
+        <div class="bg-white/5 rounded-xl p-4">
+          <i data-lucide="phone" style="width:20px;height:20px;color:#C8A951;margin:0 auto 8px;display:block;"></i>
+          <p class="text-xs text-white/50 mb-1">Reception</p>
+          <p class="font-semibold text-sm">+91 98340 99497</p>
+        </div>
+      </div>
+      <div class="text-left text-white/40 text-[10px] leading-relaxed mb-4 space-y-1 bg-midnight-800 p-4 rounded-xl">
+        <p>• Management reserves the right to admission.</p>
+        <p>• All prices are exclusive of applicable govt. taxes.</p>
+        <p>• Patrons below the legal drinking age will be refused service.</p>
+        <p>• Please inform your server in advance for any food allergies.</p>
+        <p>• Orders once placed, cannot be cancelled.</p>
+        <p>• Please allow 15-20 Mins. for Beverage & 30-40 Mins. for Food Service.</p>
+      </div>
+      <div class="divider mb-4"></div>
+      <p class="text-white/20 text-xs">© 2026 Sunrise N Resorts. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="cartFab" onclick="openCart()" class="btn-gold w-14 h-14 rounded-full shadow-xl flex items-center justify-center">
+    <i data-lucide="shopping-cart" style="width:22px;height:22px;"></i>
+    <span id="fabBadge" class="absolute -top-1 -right-1 bg-midnight-900 text-gold-400 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+  </button>
+
+  <div id="cartModal" class="modal-bg" onclick="handleCartOverlay(event)">
+    <div class="modal-sheet">
+      <div class="sticky top-0 bg-white z-10 px-5 pt-5 pb-3 border-b border-midnight-100">
+        <div class="flex items-center justify-between">
+          <h3 class="font-display text-xl font-bold text-midnight-900">Your Order</h3>
+          <button onclick="closeCart()" class="w-8 h-8 rounded-full bg-midnight-50 flex items-center justify-center">
+            <i data-lucide="x" style="width:18px;height:18px;color:#626572;"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="cartItemsContainer" class="px-5 py-4 space-y-3 min-h-[120px]"></div>
+
+      <div id="cartFooter" class="hidden sticky bottom-0 bg-white border-t border-midnight-100 px-5 pt-4 pb-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="font-display text-lg font-bold text-midnight-900">Total</span>
+          <span id="cartTotalLabel" class="font-display text-lg font-bold text-gold-600">₹0</span>
+        </div>
+        <button onclick="closeCart(); openCheckout();" class="w-full btn-wa py-3.5 rounded-full text-base flex items-center justify-center gap-2">
+          <i data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+          Proceed to Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="checkoutModal" class="modal-bg" onclick="handleCheckoutOverlay(event)">
+    <div class="modal-sheet">
+      <div class="sticky top-0 bg-white z-10 px-5 pt-5 pb-3 border-b border-midnight-100">
+        <div class="flex items-center gap-3">
+          <button onclick="closeCheckout(); openCart();" class="w-8 h-8 rounded-full bg-midnight-50 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="arrow-left" style="width:18px;height:18px;color:#626572;"></i>
+          </button>
+          <div>
+            <h3 class="font-display font-bold text-midnight-900">Confirm Your Order</h3>
+            <p class="text-midnight-400 text-xs mt-0.5">Fill in your details below</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-4 space-y-4">
+
+        <div>
+          <label class="block text-midnight-700 text-sm font-semibold mb-1.5">
+            Room Number <span class="text-red-500">*</span>
+          </label>
+          <input id="inRoom" type="text" placeholder="e.g. 305" maxlength="6"
+            class="w-full border border-midnight-200 rounded-xl px-4 py-3 text-sm transition-all">
+          <p class="text-midnight-300 text-xs mt-1">We'll deliver to this room</p>
+        </div>
+
+        <div>
+          <label class="block text-midnight-700 text-sm font-semibold mb-1.5">Your Name</label>
+          <input id="inName" type="text" placeholder="Guest name (optional)"
+            class="w-full border border-midnight-200 rounded-xl px-4 py-3 text-sm transition-all">
+        </div>
+
+        <div class="bg-midnight-50 rounded-xl p-4">
+          <p class="text-midnight-600 text-xs font-semibold uppercase tracking-wider mb-3">Order Summary</p>
+          <div id="checkoutItemsContainer" class="space-y-2 max-h-44 overflow-y-auto mb-3"></div>
+          <div class="border-t border-midnight-200 pt-3">
+            <div class="flex items-center justify-between">
+              <span class="text-midnight-600 font-semibold text-sm">Total Amount</span>
+              <span id="checkoutTotalLabel" class="font-display text-lg font-bold text-gold-600">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-midnight-700 text-sm font-semibold mb-1.5">Special Instructions</label>
+          <textarea id="inInstructions" placeholder="e.g. Less spicy, extra napkins, no onions…" maxlength="200"
+            class="w-full border border-midnight-200 rounded-xl px-4 py-3 text-sm resize-none h-20 transition-all"
+            oninput="document.getElementById('charCount').textContent=this.value.length"></textarea>
+          <p class="text-midnight-300 text-xs mt-1"><span id="charCount">0</span>/200</p>
+        </div>
+
+        <button onclick="sendWhatsAppOrder()" class="w-full btn-wa py-3.5 rounded-full text-base font-semibold flex items-center justify-center gap-2 mt-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+          </svg>
+          Send Order on WhatsApp
+        </button>
+
+        <div class="bg-gold-50 border border-gold-200 rounded-xl p-3 text-center">
+          <p class="text-gold-900 text-xs">
+            <i data-lucide="info" style="width:13px;height:13px;display:inline;margin-right:5px;vertical-align:middle;"></i>
+            You will be redirected to WhatsApp to confirm
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">
+    <i data-lucide="check-circle" style="width:16px;height:16px;color:#25D366;flex-shrink:0;"></i>
+    <span id="toastMsg">Added to order</span>
+  </div>
+
+</div><script>
+// ═══════════════════════════════════════════════════════════════
+//  DATA - ELIXIR MULTI CUISINE MENU
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'breakfast',     name:'Breakfast',       emoji:'🍳', color:'from-yellow-400 to-orange-500' },
+  { id:'beverages',     name:'Beverages',       emoji:'🥤', color:'from-sky-500 to-blue-600'     },
+  { id:'soups_salads',  name:'Soups & Salads',  emoji:'🥗', color:'from-emerald-400 to-teal-500' },
+  { id:'snacks_pasta',  name:'Snacks & Pasta',  emoji:'🍟', color:'from-amber-400 to-yellow-500' },
+  { id:'starters',      name:'Starters',        emoji:'🍢', color:'from-orange-500 to-red-500'   },
+  { id:'indian_main',   name:'Indian Main',     emoji:'🍛', color:'from-red-500 to-rose-600'     },
+  { id:'chinese_main',  name:'Chinese Main',    emoji:'🥡', color:'from-pink-500 to-fuchsia-600' },
+  { id:'rice_noodles',  name:'Rice & Noodles',  emoji:'🍚', color:'from-amber-600 to-yellow-700' },
+  { id:'dal_breads',    name:'Dal & Breads',    emoji:'🫓', color:'from-yellow-600 to-orange-600'},
+  { id:'accompaniments',name:'Accompaniments',  emoji:'🥒', color:'from-lime-500 to-green-600'   },
+  { id:'desserts',      name:'Desserts',        emoji:'🍰', color:'from-purple-400 to-indigo-500'}
+];
+
+const MENU = {
+  beverages: [
+    { name:'Packaged Drinking Water', desc:'1 Ltr', price:50, veg:true },
+    { name:'Tea / Coffee', desc:'Hot Beverage', price:60, veg:true },
+    { name:'Hot Milk', desc:'Plain', price:80, veg:true },
+    { name:'Bournvita / Hot Chocolate', desc:'Hot Beverage', price:100, veg:true },
+    { name:'Buttermilk', desc:'Fresh Chilled', price:70, veg:true },
+    { name:'Lassi', desc:'Plain / Mango / Strawberry', price:100, veg:true },
+    { name:'Fresh Lime Water / Soda', desc:'Sweet or Salted', price:80, veg:true },
+    { name:'Canned Juice', desc:'Assorted Flavors', price:150, veg:true },
+    { name:'Cold Coffee', desc:'With / Without Ice Cream', price:150, veg:true },
+    { name:'Choice Of Shakes', desc:'Chocolate / Strawberry / Butter Scotch / Oreo', price:200, veg:true },
+    { name:'Energy Drink', desc:'Chilled Can', price:200, veg:true },
+    { name:'Soft Beverage', desc:'750 ml Pet Bottle', price:120, veg:true }
+  ],
+  breakfast: [
+    { name:'Choice Of Cereal', desc:'With Hot / Cold Milk', price:150, veg:true },
+    { name:'Bread Toast', desc:'4 Slices With Butter & Jam', price:120, veg:true },
+    { name:'Eggs To Order', desc:'2 Eggs Served With 2 Slice Bread & Mashed Potato', price:150, veg:false },
+    { name:'Pancakes', desc:'With Maple Syrup', price:150, veg:true },
+    { name:'Upma', desc:'Classic South Indian style', price:150, veg:true },
+    { name:'Plain Dosa', desc:'Served with Chutney & Sambhar', price:125, veg:true },
+    { name:'Masala Dosa', desc:'Served with Chutney & Sambhar', price:150, veg:true },
+    { name:'Uttapam', desc:'Plain / Masala', price:150, veg:true },
+    { name:'Steamed Idli', desc:'3 Idlis With Chutney & Sambhar', price:125, veg:true },
+    { name:'Poha', desc:'With Tarri', price:125, veg:true },
+    { name:'Choice Of Paratha', desc:'2 Aloo / Mix Veg / Paneer Parathas', price:200, veg:true },
+    { name:'Poori Bhaji', desc:'4 Puris', price:150, veg:true }
+  ],
+  soups_salads: [
+    { name:'Veg. Caeser Salad', desc:'Fresh and crisp', price:300, veg:true },
+    { name:'Waldorf Salad', desc:'Apples, celery, and walnuts', price:300, veg:true },
+    { name:'Paneer Tikka Salad', desc:'Tandoori paneer slices with greens', price:300, veg:true },
+    { name:'Chicken Caeser Salad', desc:'Classic caeser with grilled chicken', price:350, veg:false },
+    { name:'Chicken Tikka Salad', desc:'Tandoori chicken slices with greens', price:350, veg:false },
+    { name:'Tomato Dhaniya Shorba', desc:'Light tomato and coriander soup', price:150, veg:true },
+    { name:'Dal Shorba', desc:'Lentil based warm soup', price:175, veg:true },
+    { name:'Cream Of Tomato', desc:'Rich creamy classic', price:175, veg:true },
+    { name:'Veg. Sweet Corn Soup', desc:'Classic comforting corn soup', price:175, veg:true },
+    { name:'Veg. Manchow Soup', desc:'Spicy and sour with crispy noodles', price:175, veg:true },
+    { name:'Veg. Hot & Sour Soup', desc:'Tangy and spicy', price:175, veg:true },
+    { name:'Chicken Shorba', desc:'Light spiced chicken broth', price:200, veg:false },
+    { name:'Cream Of Chicken Soup', desc:'Rich and creamy', price:225, veg:false },
+    { name:'Chicken Manchow Soup', desc:'With crispy noodles', price:225, veg:false }
+  ],
+  snacks_pasta: [
+    { name:'Veg. Sandwich', desc:'Plain / Grilled', price:150, veg:true },
+    { name:'Veg. Club Sandwich', desc:'Triple layered loaded sandwich', price:250, veg:true },
+    { name:'Veg. Burger', desc:'Served hot and crispy', price:250, veg:true },
+    { name:'French Fries', desc:'Classic Salted / Peri Peri', price:125, veg:true },
+    { name:'Veg Pizza', desc:'Homemade crust', price:250, veg:true },
+    { name:'Chili Cheese Toast', desc:'Crispy and spicy', price:225, veg:true },
+    { name:'Paneer Pakoda', desc:'Deep fried cottage cheese fritters', price:250, veg:true },
+    { name:'Maggi', desc:'Plain / Masala', price:100, veg:true },
+    { name:'Nachos', desc:'With Salsa Sauce', price:200, veg:true },
+    { name:'Veg. Kathi Roll', desc:'Mixed vegetables wrapped in roll', price:250, veg:true },
+    { name:'Chicken Sandwich', desc:'Plain / Grilled', price:200, veg:false },
+    { name:'Chicken Club Sandwich', desc:'Triple layered loaded', price:300, veg:false },
+    { name:'Chicken Burger', desc:'Served hot', price:300, veg:false },
+    { name:'Chicken Pizza', desc:'Homemade crust', price:300, veg:false },
+    { name:'Veg. Mac & Cheese', desc:'Cheesy classic pasta', price:300, veg:true },
+    { name:'Chicken Mac & Cheese', desc:'With tender chicken chunks', price:350, veg:false },
+    { name:'Veg. Pasta In Arabiatta', desc:'Red Sauce', price:275, veg:true },
+    { name:'Veg. Pasta In Alfredo', desc:'White Sauce', price:275, veg:true },
+    { name:'Chicken Pasta Arabiatta', desc:'Red Sauce', price:350, veg:false },
+    { name:'Chicken Pasta Alfredo', desc:'White Sauce', price:350, veg:false }
+  ],
+  starters: [
+    { name:'Paneer Tikka', desc:'Tandoor roasted cottage cheese', price:325, veg:true },
+    { name:'Paneer Achari Tikka', desc:'Pickle flavored paneer', price:350, veg:true },
+    { name:'Paneer Malai Tikka', desc:'Creamy mild paneer tikka', price:350, veg:true },
+    { name:'Hara Bhara Kebab', desc:'Spinach & pea patties', price:250, veg:true },
+    { name:'Dahi Ke Kebab', desc:'Crispy yogurt patties', price:300, veg:true },
+    { name:'Veg. Spring Roll', desc:'Crispy rolls with veg filling', price:250, veg:true },
+    { name:'Paneer Chili', desc:'Crispy paneer tossed in soy chilli', price:350, veg:true },
+    { name:'Veg. Manchurian', desc:'Dry / Schezwan', price:250, veg:true },
+    { name:'Crispy Corn', desc:'Golden fried corn kernels', price:200, veg:true },
+    { name:'Veg. Steamed Momos', desc:'Classic dumplings', price:200, veg:true },
+    { name:'Tandoori Chicken (Half)', desc:'Classic tandoor roasted', price:400, veg:false },
+    { name:'Tandoori Chicken (Full)', desc:'Classic tandoor roasted', price:700, veg:false },
+    { name:'Chicken Tikka', desc:'Boneless tandoori chunks', price:350, veg:false },
+    { name:'Chicken Malai Tikka', desc:'Creamy mild chicken chunks', price:350, veg:false },
+    { name:'Chicken Tangdi Kebab', desc:'Tandoori chicken drumsticks', price:400, veg:false },
+    { name:'Mutton Boti Kebab', desc:'Tender mutton chunks', price:550, veg:false },
+    { name:'Fish Tikka (Rawas)', desc:'Tandoori fish chunks', price:550, veg:false },
+    { name:'Chili Chicken', desc:'Tossed in spicy sauces', price:400, veg:false },
+    { name:'Chicken Lollypop', desc:'Crispy fried wings', price:450, veg:false },
+    { name:'Chicken Steamed Momos', desc:'Classic dumplings', price:250, veg:false },
+    { name:'Fish & Chips (Rawas)', desc:'Classic battered fish with fries', price:650, veg:false }
+  ],
+  indian_main: [
+    { name:'Veg. Kadhai', desc:'Mixed vegetables in spiced gravy', price:300, veg:true },
+    { name:'Veg. Kolhapuri', desc:'Spicy mixed veg curry', price:300, veg:true },
+    { name:'Veg. Navratan Korma', desc:'Rich creamy veg gravy', price:350, veg:true },
+    { name:'Paneer Butter Masala', desc:'Classic rich tomato gravy', price:350, veg:true },
+    { name:'Paneer Lababdar', desc:'Rich onion tomato gravy', price:350, veg:true },
+    { name:'Paneer Palak', desc:'Cottage cheese in spinach gravy', price:350, veg:true },
+    { name:'Mushroom Masala', desc:'Spiced mushroom curry', price:325, veg:true },
+    { name:'Dum Aloo Kashmiri', desc:'Mild sweet & rich potato curry', price:325, veg:true },
+    { name:'Bhindi Masala', desc:'Okra tossed in Indian spices', price:275, veg:true },
+    { name:'Butter Chicken', desc:'Classic rich and creamy', price:450, veg:false },
+    { name:'Chicken Curry', desc:'Homestyle chicken curry', price:375, veg:false },
+    { name:'Chicken Kadhai', desc:'Chicken tossed with bell peppers', price:425, veg:false },
+    { name:'Chicken Roganjosh', desc:'Kashmiri style aromatic gravy', price:425, veg:false },
+    { name:'Mutton Curry', desc:'Homestyle mutton curry', price:500, veg:false },
+    { name:'Mutton Roganjosh', desc:'Slow cooked rich mutton curry', price:550, veg:false },
+    { name:'Mutton Handi (Half)', desc:'Slow cooked in handi', price:700, veg:false },
+    { name:'Fish Curry', desc:'Coastal style fish curry', price:550, veg:false },
+    { name:'Prawn Curry', desc:'Rich and flavorful prawn gravy', price:700, veg:false }
+  ],
+  chinese_main: [
+    { name:'Chili Paneer Gravy', desc:'Paneer cubes in spicy soy sauce', price:300, veg:true },
+    { name:'Paneer In Schezwan Sauce', desc:'Fiery and tangy', price:300, veg:true },
+    { name:'Stir - Fried Vegetables', desc:'Healthy tossed veggies', price:275, veg:true },
+    { name:'Veg. Manchurian Gravy', desc:'Veg balls in dark soy gravy', price:275, veg:true },
+    { name:'Chili Chicken Gravy', desc:'Classic spicy chicken gravy', price:350, veg:false },
+    { name:'Chicken In Hot Garlic Sauce', desc:'Garlicky and spicy', price:350, veg:false },
+    { name:'Chicken Manchurian Gravy', desc:'Minced chicken balls in gravy', price:350, veg:false },
+    { name:'Fish In Hot Garlic Sauce', desc:'Spicy fish preparation', price:600, veg:false }
+  ],
+  rice_noodles: [
+    { name:'Steamed Rice', desc:'Plain cooked basmati', price:200, veg:true },
+    { name:'Jeera Rice', desc:'Cumin tossed rice', price:225, veg:true },
+    { name:'Curd Rice', desc:'South Indian comfort food', price:250, veg:true },
+    { name:'Veg. Pulao', desc:'Mixed veg fragrant rice', price:250, veg:true },
+    { name:'Veg. Biryani', desc:'Aromatic dum biryani', price:275, veg:true },
+    { name:'Dal Khichdi', desc:'Comforting lentil rice blend', price:250, veg:true },
+    { name:'Veg. Fried Rice', desc:'Wok tossed rice', price:250, veg:true },
+    { name:'Veg. Hakka Noodles', desc:'Wok tossed noodles', price:250, veg:true },
+    { name:'Veg. Schezwan Noodles', desc:'Spicy tossed noodles', price:250, veg:true },
+    { name:'Egg Biryani', desc:'Aromatic rice with boiled eggs', price:275, veg:false },
+    { name:'Chicken Biryani', desc:'Classic chicken dum biryani', price:350, veg:false },
+    { name:'Mutton Biryani', desc:'Rich mutton dum biryani', price:450, veg:false },
+    { name:'Chicken Fried Rice', desc:'Wok tossed with chicken & egg', price:300, veg:false },
+    { name:'Chicken Hakka Noodles', desc:'Classic chicken noodles', price:275, veg:false }
+  ],
+  dal_breads: [
+    { name:'Dal Fry', desc:'Yellow lentils tempered with cumin', price:200, veg:true },
+    { name:'Dal Tadka', desc:'Yellow lentils with garlic tempering', price:225, veg:true },
+    { name:'Dal Makhani', desc:'Creamy slow cooked black lentils', price:275, veg:true },
+    { name:'Tandoori Roti', desc:'Clay oven baked', price:40, veg:true },
+    { name:'Butter Tandoori Roti', desc:'Glazed with butter', price:50, veg:true },
+    { name:'Missi Roti', desc:'Gram flour spiced flatbread', price:60, veg:true },
+    { name:'Laccha Paratha', desc:'Layered whole wheat bread', price:60, veg:true },
+    { name:'Naan', desc:'Soft refined flour bread', price:60, veg:true },
+    { name:'Butter Naan', desc:'Soft bread topped with butter', price:80, veg:true },
+    { name:'Garlic Naan', desc:'Topped with chopped garlic', price:80, veg:true },
+    { name:'Mix Veg. Kulcha', desc:'Stuffed soft bread', price:100, veg:true }
+  ],
+  accompaniments: [
+    { name:'Green Salad', desc:'Fresh cucumber, tomato, onion', price:125, veg:true },
+    { name:'Plain Curd', desc:'Fresh yogurt', price:100, veg:true },
+    { name:'Mix Veg. Raita', desc:'Yogurt with chopped veggies', price:150, veg:true },
+    { name:'Boondi Raita', desc:'Yogurt with crispy gram flour pearls', price:150, veg:true },
+    { name:'Pineapple Raita', desc:'Sweet and tangy', price:175, veg:true },
+    { name:'Roasted Papad', desc:'Crispy lentil wafer', price:75, veg:true },
+    { name:'Masala Papad', desc:'Topped with spiced onions & tomatoes', price:100, veg:true },
+    { name:'Peanut Masala', desc:'Spicy tossed peanuts', price:125, veg:true }
+  ],
+  desserts: [
+    { name:'Choice Of Ice Cream', desc:'Assorted flavors', price:125, veg:true },
+    { name:'Chocolate Brownie', desc:'With Ice Cream', price:175, veg:true },
+    { name:'Hot Gulab Jamun', desc:'2 Pcs of classic sweet dumplings', price:125, veg:true },
+    { name:'Rasgulla', desc:'2 Pcs soft cheese dumplings in syrup', price:125, veg:true },
+    { name:'Kesari Kheer', desc:'Saffron infused rice pudding', price:125, veg:true },
+    { name:'Fruit Custard', desc:'Creamy custard with mixed fruits', price:225, veg:true },
+    { name:'Fruit Salad', desc:'With Ice Cream', price:250, veg:true }
+  ]
+};
+
+const WHATSAPP_NUMBER = '919834099497'; // Country code + number, digits only
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let cart = {};           // { itemName: { price, qty } }
+let activeCategory = null;
+
+// ═══════════════════════════════════════════════════════════════
+//  CART HELPERS
+// ═══════════════════════════════════════════════════════════════
+function cartCount()  { return Object.values(cart).reduce((s,v)=>s+v.qty,0); }
+function cartTotal()  { return Object.values(cart).reduce((s,v)=>s+v.price*v.qty,0); }
+
+function addToCart(name, price) {
+  if (cart[name]) { cart[name].qty++; }
+  else            { cart[name] = { price, qty:1 }; }
+  syncCartUI();
+  showToast('✓ Added to order');
+  if (activeCategory) renderItems(activeCategory);
+}
+
+function changeQty(name, delta) {
+  if (!cart[name]) return;
+  cart[name].qty += delta;
+  if (cart[name].qty <= 0) delete cart[name];
+  syncCartUI();
+  if (activeCategory) renderItems(activeCategory);
+  renderCartItems();
+  renderCheckoutSummary();
+}
+
+function syncCartUI() {
+  const count = cartCount();
+  // Nav badge
+  document.getElementById('navCartCount').textContent = count;
+  // FAB badge
+  const fab  = document.getElementById('cartFab');
+  const badge = document.getElementById('fabBadge');
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+  // Cart footer
+  document.getElementById('cartTotalLabel').textContent = '₹' + cartTotal();
+  document.getElementById('cartFooter').classList.toggle('hidden', count === 0);
+  // Checkout total
+  document.getElementById('checkoutTotalLabel').textContent = '₹' + cartTotal();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER – CATEGORIES GRID
+// ═══════════════════════════════════════════════════════════════
+function renderCategories() {
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+  CATEGORIES.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-card bg-white rounded-2xl p-3 text-center shadow-sm border border-midnight-100/50';
+    btn.onclick = () => showCategory(cat.id);
+    btn.innerHTML = `
+      <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl shadow-md">${cat.emoji}</div>
+      <p class="text-midnight-800 text-[11px] sm:text-xs font-semibold leading-tight">${cat.name}</p>`;
+    grid.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER – MENU ITEMS
+// ═══════════════════════════════════════════════════════════════
+const GRAD = [
+  'from-amber-100 to-orange-100','from-rose-100 to-pink-100',
+  'from-emerald-100 to-teal-100','from-sky-100 to-blue-100',
+  'from-violet-100 to-purple-100','from-yellow-100 to-amber-100'
+];
+
+function renderItems(catId) {
+  const list  = document.getElementById('itemsList');
+  const items = MENU[catId] || [];
+  const emoji = (CATEGORIES.find(c=>c.id===catId)||{}).emoji || '🍽️';
+  list.innerHTML = '';
+  items.forEach((item, i) => {
+    const inCart = cart[item.name];
+    const qty    = inCart ? inCart.qty : 0;
+    const div    = document.createElement('div');
+    div.className = 'item-card bg-white rounded-2xl border border-midnight-100/50 shadow-sm overflow-hidden';
+    div.innerHTML = `
+      <div class="flex gap-3 p-3">
+        <div class="w-20 h-20 rounded-xl bg-gradient-to-br ${GRAD[i%GRAD.length]} flex items-center justify-center shrink-0 text-3xl shadow-inner">${emoji}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start gap-1.5 mb-1">
+            <div class="${item.veg?'veg-dot':'nonveg-dot'} mt-0.5"></div>
+            <h4 class="font-semibold text-midnight-900 text-sm leading-tight">${item.name}</h4>
+          </div>
+          <p class="text-midnight-400 text-xs mb-2 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${item.desc}</p>
+          <div class="flex items-center justify-between">
+            <span class="font-display font-bold text-midnight-900">₹${item.price}</span>
+            ${qty > 0
+              ? `<div class="flex items-center gap-1">
+                   <button onclick="changeQty('${item.name.replace(/'/g,"\\'")}', -1)" class="w-7 h-7 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center font-bold text-base leading-none">−</button>
+                   <span class="w-6 text-center font-semibold text-sm text-midnight-900">${qty}</span>
+                   <button onclick="changeQty('${item.name.replace(/'/g,"\\'")}', 1)"  class="w-7 h-7 rounded-full bg-gold-500 text-midnight-900 flex items-center justify-center font-bold text-base leading-none">+</button>
+                 </div>`
+              : `<button onclick="addToCart('${item.name.replace(/'/g,"\\'")}', ${item.price})" class="btn-gold px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
+                   <i data-lucide="plus" style="width:12px;height:12px;"></i> Add
+                 </button>`
+            }
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(div);
+  });
+  lucide.createIcons();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SHOW / HIDE CATEGORY
+// ═══════════════════════════════════════════════════════════════
+function showCategory(catId) {
+  activeCategory = catId;
+  const cat = CATEGORIES.find(c=>c.id===catId);
+  document.getElementById('categoryTitle').textContent = cat.name;
+  document.getElementById('menuSection').classList.add('hidden');
+  document.getElementById('itemsSection').classList.remove('hidden');
+  renderItems(catId);
+  document.getElementById('itemsSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function backToCategories() {
+  activeCategory = null;
+  document.getElementById('menuSection').classList.remove('hidden');
+  document.getElementById('itemsSection').classList.add('hidden');
+  document.getElementById('menuSection').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CART MODAL
+// ═══════════════════════════════════════════════════════════════
+function renderCartItems() {
+  const wrap = document.getElementById('cartItemsContainer');
+  if (cartCount() === 0) {
+    wrap.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="shopping-bag" style="width:40px;height:40px;color:#cdced3;margin:0 auto 12px;display:block;"></i>
+        <p class="text-midnight-400 text-sm">Your cart is empty</p>
+        <p class="text-midnight-300 text-xs mt-1">Browse the menu to add items</p>
+      </div>`;
+    lucide.createIcons();
+    return;
+  }
+  wrap.innerHTML = '';
+  Object.entries(cart).forEach(([name, {price, qty}]) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-3 bg-midnight-50 rounded-xl p-3';
+    row.innerHTML = `
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm text-midnight-900 truncate">${name}</p>
+        <p class="text-gold-600 text-sm font-bold">₹${price} × ${qty} = <span class="text-midnight-800">₹${price*qty}</span></p>
+      </div>
+      <div class="flex items-center gap-1">
+        <button onclick="changeQty('${name.replace(/'/g,"\\'")}', -1); renderCartItems();" class="w-7 h-7 rounded-full bg-white text-midnight-600 flex items-center justify-center font-bold shadow-sm">−</button>
+        <span class="w-6 text-center font-semibold text-sm">${qty}</span>
+        <button onclick="changeQty('${name.replace(/'/g,"\\'")}', 1);  renderCartItems();" class="w-7 h-7 rounded-full bg-gold-500 text-midnight-900 flex items-center justify-center font-bold shadow-sm">+</button>
+      </div>
+      <button onclick="changeQty('${name.replace(/'/g,"\\'")}', -${qty}); renderCartItems();" class="w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center">
+        <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+      </button>`;
+    wrap.appendChild(row);
+  });
+  lucide.createIcons();
+}
+
+function openCart() {
+  renderCartItems();
+  document.getElementById('cartModal').classList.add('open');
+}
+function closeCart() {
+  document.getElementById('cartModal').classList.remove('open');
+}
+function handleCartOverlay(e) {
+  if (e.target === document.getElementById('cartModal')) closeCart();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CHECKOUT MODAL
+// ═══════════════════════════════════════════════════════════════
+function renderCheckoutSummary() {
+  const wrap = document.getElementById('checkoutItemsContainer');
+  wrap.innerHTML = '';
+  Object.entries(cart).forEach(([name, {price, qty}]) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between text-sm';
+    row.innerHTML = `
+      <span class="text-midnight-600 truncate pr-2">${name}</span>
+      <span class="text-midnight-700 font-semibold whitespace-nowrap">₹${price*qty} <span class="text-midnight-400 font-normal">(${qty}x)</span></span>`;
+    wrap.appendChild(row);
+  });
+  document.getElementById('checkoutTotalLabel').textContent = '₹' + cartTotal();
+}
+
+function openCheckout() {
+  if (cartCount() === 0) { showToast('Add items first'); return; }
+  renderCheckoutSummary();
+  document.getElementById('checkoutModal').classList.add('open');
+}
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
+}
+function handleCheckoutOverlay(e) {
+  if (e.target === document.getElementById('checkoutModal')) closeCheckout();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WHATSAPP ORDER
+// ═══════════════════════════════════════════════════════════════
+function sendWhatsAppOrder() {
+  const room  = document.getElementById('inRoom').value.trim();
+  const name  = document.getElementById('inName').value.trim();
+  const notes = document.getElementById('inInstructions').value.trim();
+
+  if (!room) {
+    document.getElementById('inRoom').focus();
+    showToast('⚠️ Please enter your room number');
+    return;
+  }
+  if (cartCount() === 0) {
+    showToast('⚠️ Your cart is empty');
+    return;
+  }
+
+  // Build message
+  let msg = '🍽️ *New Room Service Order*\n';
+  msg += '🏨 *ELIXIR - Sunrise N Resorts*\n\n';
+  msg += `🚪 *Room Number:* ${room}\n`;
+  if (name) msg += `👤 *Guest Name:* ${name}\n`;
+  msg += '\n📋 *Order Details:*\n';
+  msg += '──────────────────\n';
+  let idx = 1;
+  Object.entries(cart).forEach(([n, {price, qty}]) => {
+    msg += `${idx++}. ${n} × ${qty}  →  ₹${price*qty}\n`;
+  });
+  msg += '──────────────────\n';
+  msg += `💰 *Total: ₹${cartTotal()}*\n`;
+  if (notes) {
+    msg += `\n📝 *Special Instructions:*\n${notes}\n`;
+  }
+  msg += '\nPlease prepare and deliver. Thank you! 🙏';
+
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+
+  // Reset after short delay
+  setTimeout(() => {
+    cart = {};
+    syncCartUI();
+    closeCheckout();
+    document.getElementById('inRoom').value         = '';
+    document.getElementById('inName').value         = '';
+    document.getElementById('inInstructions').value = '';
+    document.getElementById('charCount').textContent = '0';
+    if (activeCategory) renderItems(activeCategory);
+    showToast('✅ Order sent! Check WhatsApp');
+  }, 400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  clearTimeout(toastTimer);
+  el.classList.remove('hide');
+  el.classList.add('show');
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+    el.classList.add('hide');
+  }, 2200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NAV SCROLL
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('pageWrap').addEventListener('scroll', function () {
+  const nav = document.getElementById('topNav');
+  if (this.scrollTop > 60) {
+    nav.style.background    = 'rgba(26,26,31,0.96)';
+    nav.style.backdropFilter = 'blur(12px)';
+    nav.style.boxShadow     = '0 2px 20px rgba(0,0,0,.2)';
+  } else {
+    nav.style.background    = 'transparent';
+    nav.style.backdropFilter = 'none';
+    nav.style.boxShadow     = 'none';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+renderCategories();
+lucide.createIcons();
+</script>
+</body>
+</html>
